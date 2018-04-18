@@ -1,21 +1,40 @@
+import axios from 'axios';
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
+const notesClient = axios.create({
+    baseURL: 'http://0.0.0.0:8000/api/notes',
+    timeout: 1000
+});
+
 class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
-    );
-  }
+    state = {
+        notes: [],
+        error: ''
+    }
+
+    componentDidMount() {
+        notesClient.get('/')
+                   .then((res) => {
+                       const notes = res.data;
+                       this.setState({ notes });
+                   }).catch((err) => {
+                       console.warn(err);
+                       this.setState({ error: err.message });
+                   });
+    }
+
+    render() {
+        return (
+            <div>
+                <ul>
+                    { this.state.notes.map(note =>
+                        <li key={note.id}>{note.title}</li>) }
+                </ul>
+                { this.state.error ? <h2>{ this.state.error }</h2> : ''}
+            </div>
+        )
+    }
 }
 
 export default App;
